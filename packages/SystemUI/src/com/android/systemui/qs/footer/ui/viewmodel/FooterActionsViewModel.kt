@@ -19,6 +19,7 @@ package com.android.systemui.qs.footer.ui.viewmodel
 import android.content.Context
 import android.util.Log
 import android.view.ContextThemeWrapper
+import android.view.View
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -137,6 +138,23 @@ class FooterActionsViewModel(
             }
             .distinctUntilChanged()
 
+    /** The model for the edit button. */
+    val edit: FooterActionsButtonViewModel =
+        FooterActionsButtonViewModel(
+            id = android.R.id.edit,
+            Icon.Resource(
+                com.android.internal.R.drawable.ic_mode_edit,
+                ContentDescription.Resource(R.string.accessibility_quick_settings_edit)
+            ),
+            iconTint =
+                Utils.getColorAttrDefaultColor(
+                    context,
+                    com.android.internal.R.attr.textColorPrimary,
+                ),
+            backgroundColor = R.attr.offStateColor,
+            onClickView = this::onEditButtonClicked
+        )
+
     /** The model for the settings button. */
     val settings: FooterActionsButtonViewModel =
         FooterActionsButtonViewModel(
@@ -151,7 +169,7 @@ class FooterActionsViewModel(
                     com.android.internal.R.attr.textColorPrimary,
                 ),
             backgroundColor = R.attr.offStateColor,
-            this::onSettingsButtonClicked,
+            onClick = this::onSettingsButtonClicked,
         )
 
     /** The model for the power button. */
@@ -169,7 +187,7 @@ class FooterActionsViewModel(
                         com.android.internal.R.attr.textColorPrimaryInverse,
                     ),
                 backgroundColor = com.android.internal.R.attr.colorAccent,
-                this::onPowerButtonClicked,
+                onClick = this::onPowerButtonClicked,
             )
         } else {
             null
@@ -235,6 +253,14 @@ class FooterActionsViewModel(
         }
 
         footerActionsInteractor.showUserSwitcher(expandable)
+    }
+
+    private fun onEditButtonClicked(view: View) {
+        if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+            return
+        }
+
+        footerActionsInteractor.showEdit(view)
     }
 
     private fun onSettingsButtonClicked(expandable: Expandable) {
